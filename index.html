@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A Game for Mom</title>
+<meta name="theme-color" content="#f5f1fb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Caveat:wght@600;700&display=swap">
+<style>
+/* Layout: one calm column, a handwritten letter on top, then big tap-to-choose cards, one question at a time down the page */
+:root{
+  --bg:#f5f1fb; --paper:#ffffff; --ink:#2a1f3d; --dim:#6b6082; --line:#e3dcef;
+  --pop:#e2457f; --pop-soft:#fde3ee; --teal:#0f8b8d; --teal-soft:#d9f3f1; --sun:#f2a516;
+  --display:"Nunito",ui-rounded,system-ui,sans-serif; --hand:"Caveat","Bradley Hand",cursive; --body:"Nunito",ui-rounded,system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1526;--paper:#251d35;--ink:#f3eefb;--dim:#b4a9c9;--line:#3a2f4f;--pop:#ff6fa0;--pop-soft:#47243a;--teal:#4fd1c5;--teal-soft:#1f3b3d;--sun:#ffc552;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:19px;line-height:1.6;padding:max(20px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);line-height:1.2;text-wrap:balance;margin:0}
+.letter{background:var(--paper);border-radius:22px;padding:26px 22px;border:1px solid var(--line)}
+.letter .hi{font-family:var(--hand);font-size:44px;color:var(--pop);line-height:1;margin-bottom:12px}
+.letter p{margin:0 0 14px}
+.letter .sig{font-family:var(--hand);font-size:36px;color:var(--pop);margin-top:6px}
+.bubbles{display:flex;gap:6px;justify-content:center;margin:4px 0 -6px}
+.bubbles i{display:block;border-radius:50%;background:radial-gradient(circle at 32% 30%,#fff 0 18%,var(--pop-soft) 19% 60%,var(--pop) 100%);opacity:.9}
+.idea{background:var(--paper);border-radius:22px;padding:22px;border:1px solid var(--line)}
+.idea h2{font-size:24px;margin-bottom:10px}
+.idea h3{font-size:19px;margin:16px 0 4px;color:var(--teal)}
+.idea p{margin:0 0 8px}
+.idea ul{margin:4px 0 8px;padding-left:22px}
+.idea li{margin:4px 0}
+.callout{background:var(--teal-soft);border-radius:16px;padding:14px 16px;margin:10px 0}
+.callout b{color:var(--teal)}
+.qhead{text-align:center;padding:8px 0 0}
+.qhead h2{font-size:28px}
+.qhead p{color:var(--dim);margin:6px 0 0}
+.q{background:var(--paper);border-radius:22px;padding:20px 18px;border:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.q .num{font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--pop)}
+.q h3{font-size:22px}
+.q .hint{color:var(--dim);font-size:16px;margin-top:-6px}
+.opts{display:grid;grid-template-columns:1fr;gap:10px}
+.opt{display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;font:inherit;color:inherit;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;min-height:56px}
+.opt:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.opt .tick{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--dim);display:grid;place-items:center;font-weight:900;font-size:16px;color:transparent;margin-top:1px}
+.opt.multi .tick{border-radius:8px}
+.opt[aria-pressed="true"]{border-color:var(--pop);background:var(--pop-soft)}
+.opt[aria-pressed="true"] .tick{background:var(--pop);border-color:var(--pop);color:#fff}
+.opt b{display:block;font-size:19px}
+.opt small{display:block;color:var(--dim);font-size:15px;line-height:1.4;margin-top:2px}
+.pieces{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+.pieces .opt{flex-direction:column;align-items:center;text-align:center;padding:12px 6px;gap:4px}
+.pieces .opt .em{font-size:36px;line-height:1}
+.pieces .opt .tick{display:none}
+.pieces .opt b{font-size:15px}
+textarea{width:100%;font:inherit;font-size:18px;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px 14px;min-height:96px;resize:vertical}
+textarea:focus{outline:3px solid var(--teal);outline-offset:2px}
+.send{background:var(--paper);border-radius:22px;padding:22px;border:2px solid var(--pop);text-align:center;display:flex;flex-direction:column;gap:12px}
+.send h2{font-size:26px}
+.count{color:var(--dim);font-size:16px}
+.btn{display:block;width:100%;font:inherit;font-weight:900;font-size:21px;border:0;border-radius:18px;padding:18px;cursor:pointer;text-decoration:none;text-align:center}
+.btn.main{background:var(--pop);color:#fff}
+.btn.second{background:var(--bg);color:var(--ink);border:2px solid var(--line);font-size:18px;padding:14px}
+.btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.done{color:var(--teal);font-weight:800}
+pre.preview{white-space:pre-wrap;text-align:left;font-family:var(--body);font-size:15px;background:var(--bg);border-radius:14px;padding:12px;max-height:240px;overflow:auto;margin:0}
+@media (prefers-reduced-motion:no-preference){.opt{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bubbles" aria-hidden="true"><i style="width:18px;height:18px"></i><i style="width:30px;height:30px"></i><i style="width:14px;height:14px;margin-top:10px"></i></div>
+
+  <section class="letter">
+    <div class="hi">Dear Mom,</div>
+    <p>I'm building something, and I'm building it mostly for you.</p>
+    <p>It's a private place on our phones that's just for our family, where we can share pictures, talk, and play a big family board game together. Nobody else can see in. No ads, no strangers, and no real money, ever. If there's something you want to share with your Facebook friends or groups, one tap sends it there.</p>
+    <p>I'd love your help deciding what it should be like. Below I've written out the whole idea, and then there are a few questions. You just <b>tap the answers you like</b>, and at the very bottom there's one button that sends your answers to me in a text. Skip anything you don't care about. There are no wrong answers.</p>
+    <p>You liked Word Popper, so I think you're going to love this.</p>
+    <div class="sig">Love, Topher</div>
+  </section>
+
+  <section class="idea">
+    <h2>The idea</h2>
+    <p>Think of it as two things in one app.</p>
+
+    <h3>1. Our family's own place</h3>
+    <ul>
+      <li>Share photos, videos, and news, just with family.</li>
+      <li>Talk to everybody at once, or just one person.</li>
+      <li>Anything you post can go to Facebook too, with one tap, if you want it to.</li>
+      <li>We can also invite people who are <b>like family</b>, if you want that. You get to decide below.</li>
+    </ul>
+
+    <h3>2. A big family board game, all about us</h3>
+    <p>It plays a little like Monopoly, but the whole game runs on <b>family trivia</b>. Every question is about us: who was born where, whose favorite food is what, what happened that summer at the lake.</p>
+    <div class="callout"><b>No ordinary dice.</b> Instead of rolling two dice, a bubble pops open with a family question. Answer it and you move. Know your family, go further. You'll pick exactly how it works in question 2.</div>
+    <ul>
+      <li><b>The questions come from us.</b> When you sign up, you answer a few quick, easy things about yourself, like your birthday and your favorite food. Then, when we talk and share pictures in the family app, it can turn those moments into new questions. Nothing private goes in unless the person says it's okay.</li>
+      <li><b>A family bank.</b> Everybody has an account with play money called <b>Pop Bucks</b>. You earn it when you pass Go, answer right, and win games. You pay rent and silly family fines, just like Monopoly.</li>
+      <li><b>Rent on family places.</b> The squares are places we know, using our own pictures, like your kitchen or the lake. Land on one and buy it. When someone else lands there, they pay you rent.</li>
+      <li><b>Family fines.</b> "Forgot to call your mom: pay 50." "Late for Sunday dinner: go to Time Out."</li>
+      <li><b>A Free Pass card</b>, like Monopoly's Get Out of Jail Free. You win it, keep it, use it, or give it to someone you love.</li>
+      <li><b>Your own game piece.</b> Everyone picks a piece that's theirs, on the board and on their picture.</li>
+      <li><b>Rewards that mean something,</b> everywhere. Pop Bucks buy new game pieces, prettier boards, and even the right to put <i>your</i> picture on a square.</li>
+      <li><b>All my games are inside it</b>: Word Popper, PIC POP, and my story games. Playing any of them earns Pop Bucks for the board game. PIC POP is getting a big boost of rewards too, and it can even use our own family pictures as puzzles.</li>
+    </ul>
+
+    <h3>Ways to play</h3>
+    <ul>
+      <li>Play against family on your own phones, at the same time or one turn at a time over a few days.</li>
+      <li>Play against the computer when nobody's around.</li>
+      <li>Pass one phone around the table. It asks how many people are playing and takes turns for everyone.</li>
+    </ul>
+  </section>
+
+  <div class="qhead">
+    <h2>Your turn, Mom</h2>
+    <p>Tap the ones you like. You can change your mind anytime.</p>
+  </div>
+
+  <div id="questions"></div>
+
+  <section class="send" id="sendBox">
+    <h2>All done?</h2>
+    <div class="count" id="count">You haven't picked anything yet. That's okay too.</div>
+    <a class="btn main" id="sendBtn" href="#">Text my answers to Topher</a>
+    <button class="btn second" id="copyBtn" type="button">Copy my answers instead</button>
+    <div class="done" id="copied" hidden>Copied. Now paste it in a text or Messenger to Topher.</div>
+    <pre class="preview" id="preview" hidden></pre>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var TOPHER = "+15015758017";
+  var QUESTIONS = [
+    {id:"name", title:"What should we call it?", hint:"Pick one or more you like. I'll make sure the one we choose isn't already taken.", multi:true, opts:[
+      ["Pop Town","Our family's own little town, where every street and house is ours."],
+      ["Family Pop","Simple and sweet. Like Word Popper and PIC POP."],
+      ["Kin Board","\"Kin\" means family. A board game for kin."],
+      ["Home Sweet Pop","A play on Home Sweet Home."],
+      ["The Family Table","Like gathering around the kitchen table to play."],
+      ["Know Your Kin","Because the whole game is about knowing each other."],
+      ["Pop Quiz Family","Trivia plus a pop."],
+      ["Our Town","Plain and warm."]], other:true},
+    {id:"move", title:"How should you move, instead of dice?", hint:"This is the heart of the game. Pick your favorite.", multi:false, opts:[
+      ["Pick Your Bubble","Bubbles float up, small to big. Pop a small one for an easy question and move 2. Pop a big one for a hard question and move 6. You choose how brave to be."],
+      ["Know It, Move It","A bubble pops with a question. The faster you answer right, the further you go, up to 6 spaces."],
+      ["Lucky Pop","The bubble pops a number, 1 to 6, like a die. The questions come from the squares you land on."],
+      ["Mix it up","Use a different one each game. Let me decide."]]},
+    {id:"cats", title:"Which kinds of family questions? Pick up to 4.", hint:"We'll keep it to just a few kinds so it stays simple.", multi:true, max:4, opts:[
+      ["Who's Who","Names, nicknames, birthdays, who's related to who."],
+      ["Way Back When","Old stories and family history."],
+      ["Favorites","Favorite foods, songs, colors, shows."],
+      ["Who's in the Picture?","Guess the person, place, or year from a family photo."],
+      ["Family Firsts","First jobs, first cars, first words."],
+      ["Holidays & Traditions","What we do every Christmas, Thanksgiving, birthdays."],
+      ["Then & Now","How people and places have changed."]]},
+    {id:"join", title:"Who can join our family app?", multi:false, opts:[
+      ["Just family","Only people related to us."],
+      ["Family and people who are like family","Close friends and loved ones can be invited too."],
+      ["Like family, but I say yes first","Anyone can be invited, but Mom approves each new person."]]},
+    {id:"places", title:"What should the squares you buy and rent be?", multi:true, opts:[
+      ["Family places from our pictures","Your kitchen, the lake, the old house, the race track."],
+      ["Each family member's home","Land on my house, pay me rent."],
+      ["Our favorite spots around town","Restaurants, the church, the park, the store."],
+      ["A mix of all of these",""]]},
+    {id:"fines", title:"Which silly family fines make you laugh?", hint:"Pick as many as you like, and add your own below.", multi:true, opts:[
+      ["Forgot to call your mom","Pay 50 Pop Bucks."],
+      ["Late for Sunday dinner","Go to Time Out."],
+      ["Left the dishes in the sink","Pay 25."],
+      ["Tracked mud on the carpet","Pay 40."],
+      ["Didn't say thank you","Pay 20 to the person you forgot."],
+      ["Ate the last piece of pie","Everyone else gets 10 from you."]], other:true, otherLabel:"Your own fine idea (optional)"},
+    {id:"rewards", title:"Which rewards would mean the most?", hint:"Pick as many as you like.", multi:true, opts:[
+      ["Real-life family coupons","Winner picks Sunday dinner, loser does the dishes. You make the coupons."],
+      ["Your picture becomes a square","Earn the right to put your own photo on the board."],
+      ["New game pieces and pretty boards","Spend Pop Bucks on how your game looks."],
+      ["Trophies everyone can see","Shown in the family feed when you win."],
+      ["Free Pass cards to give away","Win them and gift them to someone."],
+      ["Bragging rights","A family leaderboard of who knows the family best."]]},
+    {id:"piece", title:"Pick your game piece", pieces:true, multi:false, opts:[
+      ["🌹","Rose"],["🐦","Bird"],["☕","Coffee cup"],["🧁","Cupcake"],["🦋","Butterfly"],["🐈","Cat"],["📖","Book"],["🎵","Music note"],["🏡","Little house"],["⭐","Star"],["🌻","Sunflower"],["🐢","Turtle"]]},
+    {id:"signup", title:"When people sign up, what should we ask them for trivia?", hint:"Just one quick answer each. Pick up to 5.", multi:true, max:5, opts:[
+      ["Birthday",""],["Where you were born",""],["Favorite food",""],["Nickname",""],["Favorite family memory",""],["First car",""],["Favorite song",""],["Something nobody knows about you",""]]},
+    {id:"else", title:"Anything else? Any ideas of your own?", textOnly:true, otherLabel:"Type anything here, or leave it blank"}
+  ];
+
+  var ans = {};
+  try{ ans = JSON.parse(localStorage.getItem("mom_answers")||"{}")||{}; }catch(e){ ans = {}; }
+  function save(){ try{ localStorage.setItem("mom_answers", JSON.stringify(ans)); }catch(e){} update(); }
+
+  var host = document.getElementById("questions");
+  QUESTIONS.forEach(function(q,qi){
+    var sec = document.createElement("section"); sec.className="q";
+    var html = '<div class="num">Question '+(qi+1)+' of '+QUESTIONS.length+'</div><h3>'+q.title+'</h3>'+(q.hint?'<div class="hint">'+q.hint+'</div>':'');
+    sec.innerHTML = html;
+    if(!q.textOnly){
+      var grid = document.createElement("div"); grid.className = "opts"+(q.pieces?" pieces":"");
+      q.opts.forEach(function(o){
+        var label = q.pieces ? o[1] : o[0];
+        var b = document.createElement("button"); b.type="button"; b.className="opt"+(q.multi?" multi":"");
+        b.innerHTML = q.pieces ? '<span class="em" aria-hidden="true">'+o[0]+'</span><b>'+o[1]+'</b><span class="tick"></span>'
+                               : '<span class="tick" aria-hidden="true">✓</span><span><b>'+o[0]+'</b>'+(o[1]?'<small>'+o[1]+'</small>':'')+'</span>';
+        function sel(){ var v=ans[q.id]; return q.multi ? (Array.isArray(v)&&v.indexOf(label)>-1) : v===label; }
+        function paint(){ b.setAttribute("aria-pressed", sel()?"true":"false"); }
+        b.addEventListener("click", function(){
+          if(q.multi){
+            var v = Array.isArray(ans[q.id]) ? ans[q.id] : [];
+            var i = v.indexOf(label);
+            if(i>-1) v.splice(i,1);
+            else { if(q.max && v.length>=q.max){ v.shift(); } v.push(label); }
+            ans[q.id]=v;
+          } else { ans[q.id] = (ans[q.id]===label) ? undefined : label; }
+          grid.querySelectorAll(".opt").forEach(function(x){ x._paint&&x._paint(); });
+          save();
+        });
+        b._paint = paint; paint();
+        grid.appendChild(b);
+      });
+      sec.appendChild(grid);
+    }
+    if(q.other || q.textOnly){
+      var t = document.createElement("textarea"); t.id = "t_"+q.id;
+      t.placeholder = q.otherLabel || "Your own idea (optional)";
+      t.setAttribute("aria-label", t.placeholder);
+      t.value = ans[q.id+"_other"] || "";
+      t.addEventListener("input", function(){ ans[q.id+"_other"] = t.value; save(); });
+      sec.appendChild(t);
+    }
+    host.appendChild(sec);
+  });
+
+  function summary(){
+    var lines = ["Mom's answers for the family game:",""];
+    var n = 0;
+    QUESTIONS.forEach(function(q,qi){
+      var v = ans[q.id], other = (ans[q.id+"_other"]||"").trim(), parts=[];
+      if(Array.isArray(v) && v.length) parts.push(v.join(", "));
+      else if(typeof v==="string") parts.push(v);
+      if(other) parts.push((parts.length?"Also: ":"")+other);
+      if(parts.length){ n++; lines.push((qi+1)+". "+q.title.replace(/\?.*$/,"?")); lines.push("   "+parts.join(" ")); }
+    });
+    return {text: n ? lines.join("\n") : "", n: n};
+  }
+  function update(){
+    var s = summary();
+    var c = document.getElementById("count");
+    c.textContent = s.n ? ("You've answered "+s.n+" of "+QUESTIONS.length+" questions.") : "You haven't picked anything yet. That's okay too.";
+    var body = encodeURIComponent(s.text || "Mom's answers: (nothing picked yet)");
+    document.getElementById("sendBtn").setAttribute("href", "sms:"+TOPHER+(/iPhone|iPad|Mac/.test(navigator.userAgent)?"&":"?")+"body="+body);
+    var p = document.getElementById("preview"); p.textContent = s.text; p.hidden = !s.n;
+  }
+  document.getElementById("copyBtn").addEventListener("click", function(){
+    var t = summary().text || "Mom's answers: (nothing picked yet)";
+    var ok = function(){ document.getElementById("copied").hidden=false; };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok, function(){ fallback(t); ok(); }); }
+    else { fallback(t); ok(); }
+  });
+  function fallback(t){ var a=document.createElement("textarea"); a.value=t; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch(e){} a.remove(); }
+  update();
+})();
+</script>
+</body>
+</html>
